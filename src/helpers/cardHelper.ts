@@ -5,9 +5,20 @@ import { Payment } from '../repositories/paymentRepository'
 import { Recharge } from '../repositories/rechargeRepository'
 
 
-const createCreditCardInfo = () => {
+const createCreditCardInfo = (cardsNumber: string[]) => {
+	const hashCardNumberTable = {}
+	cardsNumber.forEach(number => hashCardNumberTable[number] = true)
+
+	const createValidCardNumber = () => {
+		const cardNumber = faker.finance.creditCardNumber('mastercard')
+		const numberAlreadyExists = Boolean(hashCardNumberTable[cardNumber])
+
+		if (numberAlreadyExists) return createValidCardNumber()
+		return cardNumber
+	}
+
 	return {
-		cardNumber: faker.finance.creditCardNumber('mastercard'),
+		cardNumber: createValidCardNumber(),
 		cvv: faker.finance.creditCardCVV(),
 	}
 }

@@ -33,7 +33,9 @@ const createCard = async ({ employeeId, cardType, apiKey }) => {
 	const { fullName } = employee
 	await validateAddCardType(cardType, employeeId)
 
-	const { cardNumber, cvv } = createCreditCardInfo()  // TODO: Deixar mais único?
+	const existentCardsNumber = await getCardNumbers()
+	const { cardNumber, cvv } = createCreditCardInfo(existentCardsNumber)
+
 	const cardholderName = makeCardName(fullName)
 	const expirationDate = makeExpirationDate()
 
@@ -145,6 +147,12 @@ const validateAddCardType = async (cardType: TransactionTypes, employeeId: numbe
 	const card = await cardRepository.findByTypeAndEmployeeId(cardType, employeeId)
 	
 	if (card) throw new ExistentCardError(cardType)
+}
+
+const getCardNumbers = async () => {
+	const existentCards = await cardRepository.find()
+
+	return existentCards.map((card) => card.number)
 }
 
 const validateCardId = async (cardId: number) => {
