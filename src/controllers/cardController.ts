@@ -18,6 +18,28 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 
+const activate = async (req: Request, res: Response, next: NextFunction) => {
+	const {
+		body: { securityCode, password },
+		params: { cardId }
+	} = req
+	
+	try {
+		await cardService.activateCard({
+			securityCode,
+			password,
+			cardId,
+		})
+		
+		return res.status(200).send(`Card id '${cardId}' updated!`)
+		
+	} catch (error) {
+		next(error)
+	}
+}
+
+
 export {
 	create,
+	activate,
 }

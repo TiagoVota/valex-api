@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { faker } from '@faker-js/faker'
 
+
 const createCreditCardInfo = () => {
 	return {
 		cardNumber: faker.finance.creditCardNumber('mastercard'),
@@ -32,8 +33,20 @@ const makeExpirationDate = () => {
 }
 
 
+const isExpiredCard = (expirationDate: string) => {
+	const today = dayjs().endOf('month')
+	const [month, year] = expirationDate.split('/')
+	const expiredDate = dayjs(`${month}/01/${year}`).endOf('month')
+
+	const mothDiference = expiredDate.diff(today, 'month')
+
+	return mothDiference < 0
+}
+
+
 export {
 	createCreditCardInfo,
 	makeCardName,
 	makeExpirationDate,
+	isExpiredCard,
 }

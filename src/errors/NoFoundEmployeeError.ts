@@ -4,7 +4,7 @@ class NoFoundEmployeeError extends Error {
 	constructor(employeeId: number) {
 		super('NoFoundEmployeeError')
 		this.name = 'NoFoundEmployeeError'
-		this.message = `No found employee by id ${employeeId}!`
+		this.message = `No found employee by id '${employeeId}'!`
 		this.status = 404
 	}
 }

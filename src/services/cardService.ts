@@ -1,5 +1,3 @@
-import bcrypt from 'bcrypt'
-
 import * as cardRepository from '../repositories/cardRepository.js'
 import * as companyRepository from '../repositories/companyRepository.js'
 import * as employeeRepository from '../repositories/employeeRepository.js'
@@ -8,18 +6,22 @@ import { TransactionTypes } from './../repositories/cardRepository'
 
 import {
 	createCreditCardInfo,
+	isExpiredCard,
 	makeCardName,
 	makeExpirationDate
 } from '../helpers/cardHelper.js'
+import { encryptValue, isValidEncrypt } from './bcrypt.js'
 
 import AuthCompanyError from '../errors/AuthCompanyError.js'
-import NoFoundEmployeeError from '../errors/NoFoundEmployeeError.js'
 import ExistentCardError from '../errors/ExistentCardError.js'
+import ExpiredCardError from '../errors/ExpiredCardError.js'
+import NoFoundCardError from '../errors/NoFoundCardError.js'
+import NoFoundEmployeeError from '../errors/NoFoundEmployeeError.js'
+import cardAlreadyActiveError from '../errors/CardAlreadyActiveError.js'
+import InvalidCvvError from '../errors/InvalidCvvError.js'
 
 
 const createCard = async ({ employeeId, cardType, apiKey }) => {
-	const CVV_SALT = 12
-
 	await validateApiKey(apiKey)
 	const employee = await validateEmployee(employeeId)
 	const { fullName } = employee
@@ -29,7 +31,7 @@ const createCard = async ({ employeeId, cardType, apiKey }) => {
 	const cardholderName = makeCardName(fullName)
 	const expirationDate = makeExpirationDate()
 
-	const hashCvv = bcrypt.hashSync(cvv, CVV_SALT)
+	const hashCvv = encryptValue(cvv)
 
 	await cardRepository.insert({
 		employeeId,
@@ -59,6 +61,25 @@ const createCard = async ({ employeeId, cardType, apiKey }) => {
 }
 
 
+const activateCard = async ({ securityCode, password, cardId }) => {
+	const card = await validateCardId(cardId)
+	validateExpiredCard(card.expirationDate)
+	validateFirstRegister(card.password)
+	validateCvv(securityCode, card.securityCode)
+
+	const hashPassword = encryptValue(password)
+
+	await cardRepository.update(cardId, {
+		...card,
+		password: hashPassword,
+	})
+
+	return {
+		cardId,
+	}
+}
+
+
 const validateApiKey = async (apiKey: string) => {
 	const company = await companyRepository.findByApiKey(apiKey)
 
@@ -77,12 +98,32 @@ const validateEmployee = async (employeeId: number) => {
 
 const validateAddCardType = async (cardType: TransactionTypes, employeeId: number) => {
 	const card = await cardRepository.findByTypeAndEmployeeId(cardType, employeeId)
-
+	
 	if (card) throw new ExistentCardError(cardType)
+}
+
+const validateCardId = async (cardId: number) => {
+	const card = await cardRepository.findById(cardId)
+
+	if (!card) throw new NoFoundCardError(cardId)
+
+	return card
+}
+
+const validateExpiredCard = (expirationDate: string) => {
+	if (isExpiredCard(expirationDate)) throw new ExpiredCardError(expirationDate)
+}
+
+const validateFirstRegister = (cardPassword: string | null) => {
+	if (cardPassword !== null) throw new cardAlreadyActiveError('')
+}
+
+const validateCvv = (cvv: string, hashCvv: string) => {
+	if (!isValidEncrypt(cvv, hashCvv)) throw new InvalidCvvError('')
 }
 
 
 export {
 	createCard,
+	activateCard,
 }
-

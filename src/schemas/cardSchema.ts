@@ -8,7 +8,13 @@ const cardSchema = joi.object({
 	).required(),
 }).length(2)
 
+const activateSchema = joi.object({
+	securityCode: joi.string().regex(/^[0-9]{3}$/).required(),
+	password: joi.string().regex(/^[0-9]{4}$/).required(),
+}).length(2)
+
 
 export {
 	cardSchema,
+	activateSchema,
 }
