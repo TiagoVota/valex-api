@@ -11,7 +11,8 @@ import {
 	isExpiredCard,
 	makeCardBalance,
 	makeCardName,
-	makeExpirationDate
+	makeExpirationDate,
+	sanitizeCardMovement
 } from '../helpers/cardHelper.js'
 import { encryptValue, isValidEncrypt } from './bcrypt.js'
 
@@ -88,13 +89,13 @@ const getCardExtract = async ({ cardId }) => {
 
 	const transactions = await paymentRepository.findByCardId(cardId)
 	const recharges = await rechargeRepository.findByCardId(cardId)
-
+	
 	const balance = makeCardBalance(transactions, recharges)
 
 	return {
 		balance,
-		transactions,
-		recharges,
+		transactions: sanitizeCardMovement(transactions),
+		recharges: sanitizeCardMovement(recharges),
 	}
 }
 
