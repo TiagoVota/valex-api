@@ -105,6 +105,23 @@ const block = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 
+const unblock = async (req: Request, res: Response, next: NextFunction) => {
+	const {
+		body: { password },
+		params: { cardId },
+	} = req
+	
+	try {
+		await cardService.unblockCard({ cardId, password })
+		
+		return res.status(200).send(`Card id '${cardId}' unblocked!`)
+		
+	} catch (error) {
+		next(error)
+	}
+}
+
+
 export {
 	create,
 	activate,
@@ -112,4 +129,5 @@ export {
 	recharge,
 	payment,
 	block,
+	unblock,
 }

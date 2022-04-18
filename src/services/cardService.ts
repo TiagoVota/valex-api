@@ -26,6 +26,7 @@ import NoFoundIdError from '../errors/NoFoundIdError.js'
 import NoMatchTypesError from '../errors/NoMatchTypesError.js'
 import InsufficientBalanceError from '../errors/InsufficientBalanceError.js'
 import InvalidEncryptError from '../errors/InvalidEncryptError.js'
+import UnblockCardError from '../errors/UnblockCardError.js'
 
 
 const createCard = async ({ employeeId, cardType, apiKey }) => {
@@ -143,6 +144,19 @@ const blockCard = async ({ cardId, password }) => {
 }
 
 
+const unblockCard = async ({ cardId, password }) => {
+	const card = await validateCardId(cardId)
+	validateExpiredCard(card.expirationDate)
+	validateUnblockCard(card.isBlocked, cardId)
+	validateEncrypt(password, card.password, 'password')
+
+	await cardRepository.update(cardId, {
+		...card,
+		isBlocked: false
+	})
+}
+
+
 const validateApiKey = async (apiKey: string) => {
 	const company = await companyRepository.findByApiKey(apiKey)
 
@@ -213,6 +227,10 @@ const validateBlockCard = (isBlocked: boolean, cardId: number) => {
 	if (isBlocked) throw new BlockCardError(cardId)
 }
 
+const validateUnblockCard = (isBlocked: boolean, cardId: number) => {
+	if (!isBlocked) throw new UnblockCardError(cardId)
+}
+
 
 export {
 	createCard,
@@ -221,4 +239,5 @@ export {
 	rechargeCard,
 	paymentCard,
 	blockCard,
+	unblockCard,
 }

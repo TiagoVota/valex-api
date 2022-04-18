@@ -9,6 +9,7 @@ const errorsName = [
 	'NoFoundIdError',
 	'NoMatchTypesError',
 	'SchemaError',
+	'UnblockCardError',
 ]
 
 const isPersonalizedError = (errorName: string) => {
