@@ -4,9 +4,10 @@ const errorsName = [
 	'CardAlreadyActiveError',
 	'ExistentCardError',
 	'ExpiredCardError',
-	'InvalidCvvError',
-	'NoFoundCardError',
-	'NoFoundEmployeeError',
+	'InsufficientBalanceError',
+	'InvalidEncryptError',
+	'NoFoundIdError',
+	'NoMatchTypesError',
 	'SchemaError',
 ]
 
