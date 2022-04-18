@@ -1,9 +1,11 @@
-import * as businessRepository from '../repositories/businessRepository.js'
-import * as cardRepository from '../repositories/cardRepository.js'
-import * as companyRepository from '../repositories/companyRepository.js'
-import * as employeeRepository from '../repositories/employeeRepository.js'
-import * as paymentRepository from '../repositories/paymentRepository.js'
-import * as rechargeRepository from '../repositories/rechargeRepository.js'
+import {
+	businessRepository,
+	cardRepository,
+	companyRepository,
+	employeeRepository,
+	paymentRepository,
+	rechargeRepository,
+} from '../repositories/index.js'
 
 import { TransactionTypes } from './../repositories/cardRepository'
 
@@ -17,17 +19,19 @@ import {
 } from '../helpers/cardHelper.js'
 import { encryptValue, isValidEncrypt } from './bcrypt.js'
 
-import AuthCompanyError from '../errors/AuthCompanyError.js'
-import BlockCardError from '../errors/BlockCardError.js'
-import CardAlreadyActiveError from '../errors/CardAlreadyActiveError.js'
-import ExistentCardError from '../errors/ExistentCardError.js'
-import ExpiredCardError from '../errors/ExpiredCardError.js'
-import NoFoundIdError from '../errors/NoFoundIdError.js'
-import NoMatchTypesError from '../errors/NoMatchTypesError.js'
-import InsufficientBalanceError from '../errors/InsufficientBalanceError.js'
-import InvalidEncryptError from '../errors/InvalidEncryptError.js'
-import UnblockCardError from '../errors/UnblockCardError.js'
-import InvalidOnlinePaymentError from '../errors/InvalidOnlinePaymentError.js'
+import { 
+	AuthCompanyError,
+	BlockCardError,
+	CardAlreadyActiveError,
+	ExistentCardError,
+	ExpiredCardError,
+	NoFoundIdError,
+	NoMatchTypesError,
+	InsufficientBalanceError,
+	InvalidEncryptError,
+	UnblockCardError,
+	InvalidOnlinePaymentError,
+} from '../errors/index.js'
 
 
 const createCard = async ({ employeeId, cardType, apiKey }) => {

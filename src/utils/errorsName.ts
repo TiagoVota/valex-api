@@ -1,20 +1,8 @@
-const errorsName = [
-	'AuthCompanyError',
-	'BlockCardError',
-	'CardAlreadyActiveError',
-	'ExistentCardError',
-	'ExpiredCardError',
-	'InsufficientBalanceError',
-	'InvalidEncryptError',
-	'InvalidOnlinePaymentError',
-	'NoFoundIdError',
-	'NoMatchTypesError',
-	'SchemaError',
-	'UnblockCardError',
-]
+import * as personalizedErrors from '../errors/index.js'
+
 
 const isPersonalizedError = (errorName: string) => {
-	return errorsName.includes(errorName)
+	return Boolean(personalizedErrors[errorName])
 }
 
 

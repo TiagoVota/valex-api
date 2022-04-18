@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express'
 import { validationErrors } from '../validations/handleValidation.js'
 import { sanitizeInput } from '../helpers/validationHelper.js'
 
-import SchemaError from '../errors/SchemaError.js'
+import { SchemaError } from '../errors/index.js'
 
 
 function schemaValidation(schema) {
