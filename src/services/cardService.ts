@@ -18,6 +18,7 @@ import {
 import { encryptValue, isValidEncrypt } from './bcrypt.js'
 
 import AuthCompanyError from '../errors/AuthCompanyError.js'
+import BlockCardError from '../errors/BlockCardError.js'
 import CardAlreadyActiveError from '../errors/CardAlreadyActiveError.js'
 import ExistentCardError from '../errors/ExistentCardError.js'
 import ExpiredCardError from '../errors/ExpiredCardError.js'
@@ -25,6 +26,7 @@ import NoFoundIdError from '../errors/NoFoundIdError.js'
 import NoMatchTypesError from '../errors/NoMatchTypesError.js'
 import InsufficientBalanceError from '../errors/InsufficientBalanceError.js'
 import InvalidEncryptError from '../errors/InvalidEncryptError.js'
+import UnblockCardError from '../errors/UnblockCardError.js'
 
 
 const createCard = async ({ employeeId, cardType, apiKey }) => {
@@ -108,6 +110,7 @@ const rechargeCard = async ({ cardId, amount, apiKey }) => {
 	await validateApiKey(apiKey)
 	const card = await validateCardId(cardId)
 	validateExpiredCard(card.expirationDate)
+	validateBlockCard(card.isBlocked, cardId)
 
 	await rechargeRepository.insert({ cardId, amount })
 }
@@ -116,6 +119,7 @@ const rechargeCard = async ({ cardId, amount, apiKey }) => {
 const paymentCard = async ({ cardId, password, businessId, amount }) => {
 	const card = await validateCardId(cardId)
 	validateExpiredCard(card.expirationDate)
+	validateBlockCard(card.isBlocked, cardId)
 	validateEncrypt(password, card.password, 'password')
 	const business = await validateBusiness(businessId)
 	validatePaymentType([card.type, business.type])
@@ -124,6 +128,32 @@ const paymentCard = async ({ cardId, password, businessId, amount }) => {
 	validateSufficientBalance(balance, amount)
 
 	await paymentRepository.insert({ cardId, businessId, amount })
+}
+
+
+const blockCard = async ({ cardId, password }) => {
+	const card = await validateCardId(cardId)
+	validateExpiredCard(card.expirationDate)
+	validateBlockCard(card.isBlocked, cardId)
+	validateEncrypt(password, card.password, 'password')
+
+	await cardRepository.update(cardId, {
+		...card,
+		isBlocked: true
+	})
+}
+
+
+const unblockCard = async ({ cardId, password }) => {
+	const card = await validateCardId(cardId)
+	validateExpiredCard(card.expirationDate)
+	validateUnblockCard(card.isBlocked, cardId)
+	validateEncrypt(password, card.password, 'password')
+
+	await cardRepository.update(cardId, {
+		...card,
+		isBlocked: false
+	})
 }
 
 
@@ -193,6 +223,14 @@ const validateSufficientBalance = (balance: number, amount: number) => {
 	if (amount > balance) throw new InsufficientBalanceError(balance, amount)
 }
 
+const validateBlockCard = (isBlocked: boolean, cardId: number) => {
+	if (isBlocked) throw new BlockCardError(cardId)
+}
+
+const validateUnblockCard = (isBlocked: boolean, cardId: number) => {
+	if (!isBlocked) throw new UnblockCardError(cardId)
+}
+
 
 export {
 	createCard,
@@ -200,4 +238,6 @@ export {
 	getCardExtract,
 	rechargeCard,
 	paymentCard,
+	blockCard,
+	unblockCard,
 }

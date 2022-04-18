@@ -88,10 +88,46 @@ const payment = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 
+const block = async (req: Request, res: Response, next: NextFunction) => {
+	const {
+		body: { password },
+		params: { cardId },
+	} = req
+	
+	try {
+		await cardService.blockCard({ cardId, password })
+		
+		return res.status(200).send(`Card id '${cardId}' blocked!`)
+		
+	} catch (error) {
+		next(error)
+	}
+}
+
+
+const unblock = async (req: Request, res: Response, next: NextFunction) => {
+	const {
+		body: { password },
+		params: { cardId },
+	} = req
+	
+	try {
+		await cardService.unblockCard({ cardId, password })
+		
+		return res.status(200).send(`Card id '${cardId}' unblocked!`)
+		
+	} catch (error) {
+		next(error)
+	}
+}
+
+
 export {
 	create,
 	activate,
 	getExtract,
 	recharge,
 	payment,
+	block,
+	unblock,
 }

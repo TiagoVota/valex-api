@@ -1,6 +1,6 @@
 const errorsName = [
 	'AuthCompanyError',
-	'AuthError',
+	'BlockCardError',
 	'CardAlreadyActiveError',
 	'ExistentCardError',
 	'ExpiredCardError',
@@ -9,6 +9,7 @@ const errorsName = [
 	'NoFoundIdError',
 	'NoMatchTypesError',
 	'SchemaError',
+	'UnblockCardError',
 ]
 
 const isPersonalizedError = (errorName: string) => {

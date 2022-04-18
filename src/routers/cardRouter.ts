@@ -32,6 +32,16 @@ cardRouter.patch(
 	schemaValidation(cardSchema.activateSchema),
 	cardController.activate
 )
+cardRouter.patch(
+	'/:cardId/block',
+	schemaValidation(cardSchema.blockSchema),
+	cardController.block
+)
+cardRouter.patch(
+	'/:cardId/unblock',
+	schemaValidation(cardSchema.blockSchema),
+	cardController.unblock
+)
 
 
 export default cardRouter
