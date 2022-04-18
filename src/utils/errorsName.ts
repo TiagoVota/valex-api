@@ -2,6 +2,7 @@ const errorsName = [
 	'AuthCompanyError',
 	'AuthError',
 	'CardAlreadyActiveError',
+	'CardAlreadyBlockedError',
 	'ExistentCardError',
 	'ExpiredCardError',
 	'InsufficientBalanceError',
