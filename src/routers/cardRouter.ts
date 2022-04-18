@@ -26,6 +26,11 @@ cardRouter.post(
 	schemaValidation(cardSchema.paymentSchema),
 	cardController.payment
 )
+cardRouter.post(
+	'/:cardId/online-payment',
+	schemaValidation(cardSchema.onlinePaymentSchema),
+	cardController.onlinePayment
+)
 
 cardRouter.patch(
 	'/:cardId/activate',

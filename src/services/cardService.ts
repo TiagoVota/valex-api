@@ -1,9 +1,11 @@
-import * as businessRepository from '../repositories/businessRepository.js'
-import * as cardRepository from '../repositories/cardRepository.js'
-import * as companyRepository from '../repositories/companyRepository.js'
-import * as employeeRepository from '../repositories/employeeRepository.js'
-import * as paymentRepository from '../repositories/paymentRepository.js'
-import * as rechargeRepository from '../repositories/rechargeRepository.js'
+import {
+	businessRepository,
+	cardRepository,
+	companyRepository,
+	employeeRepository,
+	paymentRepository,
+	rechargeRepository,
+} from '../repositories/index.js'
 
 import { TransactionTypes } from './../repositories/cardRepository'
 
@@ -17,16 +19,19 @@ import {
 } from '../helpers/cardHelper.js'
 import { encryptValue, isValidEncrypt } from './bcrypt.js'
 
-import AuthCompanyError from '../errors/AuthCompanyError.js'
-import BlockCardError from '../errors/BlockCardError.js'
-import CardAlreadyActiveError from '../errors/CardAlreadyActiveError.js'
-import ExistentCardError from '../errors/ExistentCardError.js'
-import ExpiredCardError from '../errors/ExpiredCardError.js'
-import NoFoundIdError from '../errors/NoFoundIdError.js'
-import NoMatchTypesError from '../errors/NoMatchTypesError.js'
-import InsufficientBalanceError from '../errors/InsufficientBalanceError.js'
-import InvalidEncryptError from '../errors/InvalidEncryptError.js'
-import UnblockCardError from '../errors/UnblockCardError.js'
+import { 
+	AuthCompanyError,
+	BlockCardError,
+	CardAlreadyActiveError,
+	ExistentCardError,
+	ExpiredCardError,
+	NoFoundIdError,
+	NoMatchTypesError,
+	InsufficientBalanceError,
+	InvalidEncryptError,
+	UnblockCardError,
+	InvalidOnlinePaymentError,
+} from '../errors/index.js'
 
 
 const createCard = async ({ employeeId, cardType, apiKey }) => {
@@ -110,7 +115,6 @@ const rechargeCard = async ({ cardId, amount, apiKey }) => {
 	await validateApiKey(apiKey)
 	const card = await validateCardId(cardId)
 	validateExpiredCard(card.expirationDate)
-	validateBlockCard(card.isBlocked, cardId)
 
 	await rechargeRepository.insert({ cardId, amount })
 }
@@ -154,6 +158,29 @@ const unblockCard = async ({ cardId, password }) => {
 		...card,
 		isBlocked: false
 	})
+}
+
+
+const onlinePaymentCard = async (params) => {
+	const {
+		cardId,
+		securityCode,
+		businessId,
+		amount,
+	} = params
+
+	const card = await validateCardId(cardId)
+	validateCardInfo(params, card)
+	validateEncrypt(securityCode, card.securityCode, 'cvv')
+	validateExpiredCard(card.expirationDate)
+	validateBlockCard(card.isBlocked, cardId)
+	const business = await validateBusiness(businessId)
+	validatePaymentType([card.type, business.type])
+
+	const { balance } = await getCardExtract({ cardId })
+	validateSufficientBalance(balance, amount)
+
+	await paymentRepository.insert({ cardId, businessId, amount })
 }
 
 
@@ -231,6 +258,23 @@ const validateUnblockCard = (isBlocked: boolean, cardId: number) => {
 	if (!isBlocked) throw new UnblockCardError(cardId)
 }
 
+const validateCardInfo = (reqCardInfo, dbCardInfo) => {
+	const reqCardholderName = makeCardName(reqCardInfo.cardholderName)
+	reqCardInfo = { ...reqCardInfo, cardholderName: reqCardholderName }
+
+	const validateInfo = [
+		'number',
+		'cardholderName',
+		'expirationDate',
+	]
+
+	const haveInvalidValue = validateInfo.some((key) => {
+		return reqCardInfo[key] !== dbCardInfo[key]
+	})
+
+	if (haveInvalidValue) throw new InvalidOnlinePaymentError('')
+}
+
 
 export {
 	createCard,
@@ -240,4 +284,5 @@ export {
 	paymentCard,
 	blockCard,
 	unblockCard,
+	onlinePaymentCard,
 }
