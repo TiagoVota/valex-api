@@ -53,8 +53,27 @@ const getExtract = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 
+const recharge = async (req: Request, res: Response, next: NextFunction) => {
+	const {
+		body: { amount },
+		params: { cardId },
+	} = req
+	const apiKey = req.headers['x-api-key']
+	
+	try {
+		await cardService.rechargeCard({ cardId, amount, apiKey })
+		
+		return res.status(200).send(`Recharged '${amount}' in card id '${cardId}'!`)
+		
+	} catch (error) {
+		next(error)
+	}
+}
+
+
 export {
 	create,
 	activate,
 	getExtract,
+	recharge,
 }

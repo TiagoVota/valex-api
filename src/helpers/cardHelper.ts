@@ -47,6 +47,20 @@ const isExpiredCard = (expirationDate: string) => {
 }
 
 
+const sanitizeCardMovement = (movementList: Payment[] | Recharge[]) => {
+	return movementList.map((movement: Payment | Recharge) => {
+		return {
+			...movement,
+			timestamp: formatDate(movement.timestamp)
+		}
+	})
+}
+
+const formatDate = (timestamp: Date) => {
+	return dayjs(timestamp).format('DD/MM/YYYY')
+}
+
+
 const makeCardBalance = (transactions: Payment[], recharges: Recharge[]) => {
 	const transactionsBalance = makeBalance(transactions)
 	const rechargesBalance = makeBalance(recharges)
@@ -54,8 +68,8 @@ const makeCardBalance = (transactions: Payment[], recharges: Recharge[]) => {
 	return rechargesBalance - transactionsBalance
 }
 
-const makeBalance = (list: Payment[] | Recharge[]) => {
-	return list
+const makeBalance = (movementList: Payment[] | Recharge[]) => {
+	return movementList
 		.map(({ amount }: Payment | Recharge) => amount)
 		.reduce((amount, total) => amount + total, 0)
 }
@@ -66,5 +80,6 @@ export {
 	makeCardName,
 	makeExpirationDate,
 	isExpiredCard,
+	sanitizeCardMovement,
 	makeCardBalance,
 }
