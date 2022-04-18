@@ -6,6 +6,7 @@ const errorsName = [
 	'ExpiredCardError',
 	'InsufficientBalanceError',
 	'InvalidEncryptError',
+	'InvalidOnlinePaymentError',
 	'NoFoundIdError',
 	'NoMatchTypesError',
 	'SchemaError',

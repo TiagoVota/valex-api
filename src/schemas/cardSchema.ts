@@ -1,5 +1,11 @@
 import joi from 'joi'
 
+import {
+	cvvRegex,
+	expirationDateRegex,
+	passwordRegex
+} from '../utils/regexPatterns.js'
+
 
 const cardSchema = joi.object({
 	employeeId: joi.number().integer().min(1).required(),
@@ -10,8 +16,8 @@ const cardSchema = joi.object({
 
 
 const activateSchema = joi.object({
-	securityCode: joi.string().regex(/^[0-9]{3}$/).required(),
-	password: joi.string().regex(/^[0-9]{4}$/).required(),
+	securityCode: joi.string().regex(cvvRegex).required(),
+	password: joi.string().regex(passwordRegex).required(),
 }).length(2)
 
 
@@ -21,15 +27,25 @@ const rechargeSchema = joi.object({
 
 
 const paymentSchema = joi.object({
-	password: joi.string().regex(/^[0-9]{4}$/).required(),
+	password: joi.string().regex(passwordRegex).required(),
 	businessId: joi.number().integer().min(1).required(),
 	amount: joi.number().integer().min(1).required(),
 }).length(3)
 
 
 const blockSchema = joi.object({
-	password: joi.string().regex(/^[0-9]{4}$/).required(),
+	password: joi.string().regex(passwordRegex).required(),
 }).length(1)
+
+
+const onlinePaymentSchema = joi.object({
+	number: joi.string().length(19).required(),
+	cardholderName: joi.string().required(),
+	expirationDate: joi.string().regex(expirationDateRegex).required(),
+	securityCode: joi.string().regex(cvvRegex).required(),
+	businessId: joi.number().integer().min(1).required(),
+	amount: joi.number().integer().min(1).required(),
+}).length(6)
 
 
 export {
@@ -37,5 +53,6 @@ export {
 	activateSchema,
 	rechargeSchema,
 	paymentSchema,
-	blockSchema
+	blockSchema,
+	onlinePaymentSchema,
 }

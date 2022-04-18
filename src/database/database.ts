@@ -19,7 +19,7 @@ const devConfig: PoolConfig = {
 	password: DB_PASS
 }
 
-const databaseConfig = devConfig  // TODO: Marcus, pq isso não funciona?
+const databaseConfig = devConfig
 
 const connection = new Pool({
 	connectionString: process.env.DATABASE_URL,

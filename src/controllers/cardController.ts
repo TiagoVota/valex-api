@@ -122,6 +122,38 @@ const unblock = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 
+const onlinePayment = async (req: Request, res: Response, next: NextFunction) => {
+	const {
+		body: {
+			number,
+			cardholderName,
+			expirationDate,
+			securityCode,
+			businessId,
+			amount,
+		},
+		params: { cardId },
+	} = req
+	
+	try {
+		await cardService.onlinePaymentCard({
+			cardId,
+			number,
+			cardholderName,
+			expirationDate,
+			securityCode,
+			businessId,
+			amount,
+		})
+		
+		return res.status(200).send(`Paid out '${amount}' from card id '${cardId}'!`)
+		
+	} catch (error) {
+		next(error)
+	}
+}
+
+
 export {
 	create,
 	activate,
@@ -130,4 +162,5 @@ export {
 	payment,
 	block,
 	unblock,
+	onlinePayment,
 }
