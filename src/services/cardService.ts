@@ -99,6 +99,15 @@ const getCardExtract = async ({ cardId }) => {
 }
 
 
+const rechargeCard = async ({ cardId, amount, apiKey }) => {
+	await validateApiKey(apiKey)
+	const card = await validateCardId(cardId)
+	validateExpiredCard(card.expirationDate)
+
+	await rechargeRepository.insert({ cardId, amount })
+}
+
+
 const validateApiKey = async (apiKey: string) => {
 	const company = await companyRepository.findByApiKey(apiKey)
 
@@ -146,4 +155,5 @@ export {
 	createCard,
 	activateCard,
 	getCardExtract,
+	rechargeCard,
 }

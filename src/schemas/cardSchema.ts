@@ -13,8 +13,13 @@ const activateSchema = joi.object({
 	password: joi.string().regex(/^[0-9]{4}$/).required(),
 }).length(2)
 
+const rechargeSchema = joi.object({
+	amount: joi.number().integer().min(1).required(),
+}).length(1)
+
 
 export {
 	cardSchema,
 	activateSchema,
+	rechargeSchema,
 }
