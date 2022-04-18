@@ -9,9 +9,10 @@ import { activateSchema, cardSchema } from '../schemas/cardSchema.js'
 
 const cardRouter = Router()
 
-// cardRouter.get(':cardId/extract', cardController.getExtract)
+cardRouter.get('/:cardId/extract', cardController.getExtract)
 
 cardRouter.post('', schemaValidation(cardSchema), cardController.create)
+
 cardRouter.patch(
 	'/:cardId/activate',
 	schemaValidation(activateSchema),

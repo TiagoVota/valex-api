@@ -1,12 +1,15 @@
 import * as cardRepository from '../repositories/cardRepository.js'
 import * as companyRepository from '../repositories/companyRepository.js'
 import * as employeeRepository from '../repositories/employeeRepository.js'
+import * as paymentRepository from '../repositories/paymentRepository.js'
+import * as rechargeRepository from '../repositories/rechargeRepository.js'
 
 import { TransactionTypes } from './../repositories/cardRepository'
 
 import {
 	createCreditCardInfo,
 	isExpiredCard,
+	makeCardBalance,
 	makeCardName,
 	makeExpirationDate
 } from '../helpers/cardHelper.js'
@@ -80,6 +83,22 @@ const activateCard = async ({ securityCode, password, cardId }) => {
 }
 
 
+const getCardExtract = async ({ cardId }) => {
+	await validateCardId(cardId)
+
+	const transactions = await paymentRepository.findByCardId(cardId)
+	const recharges = await rechargeRepository.findByCardId(cardId)
+
+	const balance = makeCardBalance(transactions, recharges)
+
+	return {
+		balance,
+		transactions,
+		recharges,
+	}
+}
+
+
 const validateApiKey = async (apiKey: string) => {
 	const company = await companyRepository.findByApiKey(apiKey)
 
@@ -126,4 +145,5 @@ const validateCvv = (cvv: string, hashCvv: string) => {
 export {
 	createCard,
 	activateCard,
+	getCardExtract,
 }

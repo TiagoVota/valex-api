@@ -39,7 +39,22 @@ const activate = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 
+const getExtract = async (req: Request, res: Response, next: NextFunction) => {
+	const { params: { cardId } } = req
+	
+	try {
+		const extract = await cardService.getCardExtract({ cardId })
+		
+		return res.status(200).send(extract)
+		
+	} catch (error) {
+		next(error)
+	}
+}
+
+
 export {
 	create,
 	activate,
+	getExtract,
 }

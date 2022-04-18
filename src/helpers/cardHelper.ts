@@ -1,6 +1,9 @@
 import dayjs from 'dayjs'
 import { faker } from '@faker-js/faker'
 
+import { Payment } from '../repositories/paymentRepository'
+import { Recharge } from '../repositories/rechargeRepository'
+
 
 const createCreditCardInfo = () => {
 	return {
@@ -44,9 +47,24 @@ const isExpiredCard = (expirationDate: string) => {
 }
 
 
+const makeCardBalance = (transactions: Payment[], recharges: Recharge[]) => {
+	const transactionsBalance = makeBalance(transactions)
+	const rechargesBalance = makeBalance(recharges)
+
+	return rechargesBalance - transactionsBalance
+}
+
+const makeBalance = (list: Payment[] | Recharge[]) => {
+	return list
+		.map(({ amount }: Payment | Recharge) => amount)
+		.reduce((amount, total) => amount + total, 0)
+}
+
+
 export {
 	createCreditCardInfo,
 	makeCardName,
 	makeExpirationDate,
 	isExpiredCard,
+	makeCardBalance,
 }
