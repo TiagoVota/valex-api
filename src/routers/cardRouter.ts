@@ -12,7 +12,7 @@ const cardRouter = Router()
 // cardRouter.get(':cardId/extract', cardController.getExtract)
 
 cardRouter.post('', schemaValidation(cardSchema), cardController.create)
-cardRouter.post(
+cardRouter.patch(
 	'/:cardId/activate',
 	schemaValidation(activateSchema),
 	cardController.activate
