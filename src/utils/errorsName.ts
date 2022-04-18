@@ -1,9 +1,8 @@
 const errorsName = [
+	'AuthCompanyError',
 	'AuthError',
-	'ExistentLikeError',
-	'ExistentFollowError',
-	'NoFollowerError',
-	'NoLikeError',
+	'ExistentCardError',
+	'NoFoundEmployeeError',
 	'SchemaError',
 ]
 
