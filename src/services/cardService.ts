@@ -1,3 +1,4 @@
+import * as businessRepository from '../repositories/businessRepository.js'
 import * as cardRepository from '../repositories/cardRepository.js'
 import * as companyRepository from '../repositories/companyRepository.js'
 import * as employeeRepository from '../repositories/employeeRepository.js'
@@ -17,12 +18,13 @@ import {
 import { encryptValue, isValidEncrypt } from './bcrypt.js'
 
 import AuthCompanyError from '../errors/AuthCompanyError.js'
+import CardAlreadyActiveError from '../errors/CardAlreadyActiveError.js'
 import ExistentCardError from '../errors/ExistentCardError.js'
 import ExpiredCardError from '../errors/ExpiredCardError.js'
-import NoFoundCardError from '../errors/NoFoundCardError.js'
-import NoFoundEmployeeError from '../errors/NoFoundEmployeeError.js'
-import cardAlreadyActiveError from '../errors/CardAlreadyActiveError.js'
-import InvalidCvvError from '../errors/InvalidCvvError.js'
+import NoFoundIdError from '../errors/NoFoundIdError.js'
+import NoMatchTypesError from '../errors/NoMatchTypesError.js'
+import InsufficientBalanceError from '../errors/InsufficientBalanceError.js'
+import InvalidEncryptError from '../errors/InvalidEncryptError.js'
 
 
 const createCard = async ({ employeeId, cardType, apiKey }) => {
@@ -69,7 +71,7 @@ const activateCard = async ({ securityCode, password, cardId }) => {
 	const card = await validateCardId(cardId)
 	validateExpiredCard(card.expirationDate)
 	validateFirstRegister(card.password)
-	validateCvv(securityCode, card.securityCode)
+	validateEncrypt(securityCode, card.securityCode, 'cvv')
 
 	const hashPassword = encryptValue(password)
 
@@ -109,6 +111,20 @@ const rechargeCard = async ({ cardId, amount, apiKey }) => {
 }
 
 
+const paymentCard = async ({ cardId, password, businessId, amount }) => {
+	const card = await validateCardId(cardId)
+	validateExpiredCard(card.expirationDate)
+	validateEncrypt(password, card.password, 'password')
+	const business = await validateBusiness(businessId)
+	validatePaymentType([card.type, business.type])
+
+	const { balance } = await getCardExtract({ cardId })
+	validateSufficientBalance(balance, amount)
+
+	await paymentRepository.insert({ cardId, businessId, amount })
+}
+
+
 const validateApiKey = async (apiKey: string) => {
 	const company = await companyRepository.findByApiKey(apiKey)
 
@@ -120,7 +136,7 @@ const validateApiKey = async (apiKey: string) => {
 const validateEmployee = async (employeeId: number) => {
 	const employee = await employeeRepository.findById(employeeId)
 
-	if (!employee) throw new NoFoundEmployeeError(employeeId)
+	if (!employee) throw new NoFoundIdError(employeeId, 'employee')
 
 	return employee
 }
@@ -134,7 +150,7 @@ const validateAddCardType = async (cardType: TransactionTypes, employeeId: numbe
 const validateCardId = async (cardId: number) => {
 	const card = await cardRepository.findById(cardId)
 
-	if (!card) throw new NoFoundCardError(cardId)
+	if (!card) throw new NoFoundIdError(cardId, 'card')
 
 	return card
 }
@@ -144,11 +160,29 @@ const validateExpiredCard = (expirationDate: string) => {
 }
 
 const validateFirstRegister = (cardPassword: string | null) => {
-	if (cardPassword !== null) throw new cardAlreadyActiveError('')
+	if (cardPassword !== null) throw new CardAlreadyActiveError('')
 }
 
-const validateCvv = (cvv: string, hashCvv: string) => {
-	if (!isValidEncrypt(cvv, hashCvv)) throw new InvalidCvvError('')
+const validateEncrypt = (value: string, hashValue: string, type: string) => {
+	if (type === 'cvv') type = 'security code (CVV)'
+	if (!isValidEncrypt(value, hashValue)) throw new InvalidEncryptError(type)
+}
+
+const validateBusiness = async (businessId: number) => {
+	const business = await businessRepository.findById(businessId)
+
+	if (!business) throw new NoFoundIdError(businessId, 'business')
+
+	return business
+}
+
+const validatePaymentType = (types: TransactionTypes[]) => {
+	const [card, business] = types
+	if (card !== business) throw new NoMatchTypesError(card, business)
+}
+
+const validateSufficientBalance = (balance: number, amount: number) => {
+	if (amount > balance) throw new InsufficientBalanceError(balance, amount)
 }
 
 
@@ -157,4 +191,5 @@ export {
 	activateCard,
 	getCardExtract,
 	rechargeCard,
+	paymentCard,
 }

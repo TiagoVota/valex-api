@@ -17,9 +17,16 @@ const rechargeSchema = joi.object({
 	amount: joi.number().integer().min(1).required(),
 }).length(1)
 
+const paymentSchema = joi.object({
+	password: joi.string().regex(/^[0-9]{4}$/).required(),
+	businessId: joi.number().integer().min(1).required(),
+	amount: joi.number().integer().min(1).required(),
+}).length(3)
+
 
 export {
 	cardSchema,
 	activateSchema,
 	rechargeSchema,
+	paymentSchema,
 }

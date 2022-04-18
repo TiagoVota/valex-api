@@ -16,16 +16,21 @@ cardRouter.post(
 	schemaValidation(cardSchema.cardSchema),
 	cardController.create
 )
+cardRouter.post(
+	'/:cardId/recharge',
+	schemaValidation(cardSchema.rechargeSchema),
+	cardController.recharge
+)
+cardRouter.post(
+	'/:cardId/payment',
+	schemaValidation(cardSchema.paymentSchema),
+	cardController.payment
+)
 
 cardRouter.patch(
 	'/:cardId/activate',
 	schemaValidation(cardSchema.activateSchema),
 	cardController.activate
-)
-cardRouter.patch(
-	'/:cardId/recharge',
-	schemaValidation(cardSchema.rechargeSchema),
-	cardController.recharge
 )
 
 
